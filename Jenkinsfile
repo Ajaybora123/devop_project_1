@@ -13,6 +13,14 @@ pipeline {
                 sh 'terraform init'
             }
         }
+        stage('Install Terraform') {
+  steps {
+    sh 'wget https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip'
+    sh 'unzip terraform_1.6.6_linux_amd64.zip'
+    sh 'chmod +x terraform && sudo mv terraform /usr/local/bin/'
+    sh 'terraform version'
+  }
+}
         stage('Terraform Apply') {
             steps {
                 echo "Applying Terraform configuration"
@@ -28,3 +36,4 @@ pipeline {
         }
     }
 }
+
