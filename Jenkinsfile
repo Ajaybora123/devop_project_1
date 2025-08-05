@@ -1,59 +1,34 @@
 pipeline {
 	agent any
-	environment {
-		SERVER_NAME = "${env.SERVER_NAME}"
-		TERRAFORM_ACTION = "${env.TERRAFORM_ACTION}"
+
+	parameters {
+		string(name: 'REF', defaultValue: 'main', description: 'Reference for Terraform Apply/Destroy (e.g., branch, tag, environment)')
 	}
+
+	environment {
+		AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
+		AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+		AWS_DEFAULT_REGION    = 'us-east-1'
+	}
+
 	stages {
-		stage('Terraform') {
+		stage('Terraform Init') {
 			steps {
-				dir('DevOps_Project_2/Terraform') {
-					sh '''
-						if [ -z "${SERVER_NAME}" ]; then
-							echo "Error: SERVER_NAME is not set."
-							exit 1
-						fi
-
-						if [ -z "${TERRAFORM_ACTION}" ]; then
-							echo "Error: TERRAFORM_ACTION is not set."
-							exit 1
-						fi
-
-						case "$TERRAFORM_ACTION" in
-							apply|plan|destroy)
-								sed -i "s/server_name/${SERVER_NAME}/g" backend.tf
-								export TF_VAR_name=${SERVER_NAME}
-								terraform init
-								terraform plan
-								terraform $TERRAFORM_ACTION -auto-approve
-								;;
-							*)
-								echo "Error: TERRAFORM_ACTION must be one of: apply, destroy, plan."
-								exit 1
-								;;
-						esac
-					'''
-				}
+				sh 'terraform init'
 			}
 		}
-		stage('Ansible') {
-			when {
-				expression { env.TERRAFORM_ACTION != 'destroy' }
-			}
+		stage('Terraform Apply') {
 			steps {
-				dir('DevOps_Project_2/Ansible') {
-					sh '''
-						if [ ! -f /opt/ansible/inventory/aws_ec2.yaml ]; then
-							echo "Error: Inventory file /opt/ansible/inventory/aws_ec2.yaml does not exist."
-							exit 1
-						fi
-						if [ ! -f apache.yaml ]; then
-							echo "Error: Playbook apache.yaml does not exist in $(pwd)."
-							exit 1
-						fi
-						ansible-playbook -i /opt/ansible/inventory/aws_ec2.yaml apache.yaml
-					'''
-				}
+				echo "Applying with reference: ${params.REF}"
+				// Use REF as needed, for example, to checkout a branch or pass as a variable
+				sh "terraform apply -auto-approve -var='ref=${params.REF}'"
+			}
+		}
+		stage('Terraform Destroy') {
+			steps {
+				input message: 'Do you want to destroy the infrastructure?', ok: 'Destroy'
+				echo "Destroying with reference: ${params.REF}"
+				sh "terraform destroy -auto-approve -var='ref=${params.REF}'"
 			}
 		}
 	}
