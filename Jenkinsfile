@@ -10,9 +10,7 @@ pipeline {
 		AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
 		AWS_DEFAULT_REGION    = 'us-east-1'
 	}
-tools {
-    terraform 'terraform' // match the name you added
-}
+
 	stages {
 		stage('Terraform Init') {
 			steps {
@@ -35,4 +33,5 @@ tools {
 		}
 	}
 }
+
 
