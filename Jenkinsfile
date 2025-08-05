@@ -6,16 +6,6 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
         AWS_DEFAULT_REGION    = 'us-east-1'
     }
-stage('Install Terraform') {
-  steps {
-    sh """
-      wget https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip
-      unzip terraform_1.6.6_linux_amd64.zip
-      chmod +x terraform && sudo mv terraform /usr/local/bin/
-      terraform version
-    """
-  }
-}
 
     stages {
         stage('Terraform Init') {
@@ -38,5 +28,6 @@ stage('Install Terraform') {
         }
     }
 }
+
 
 
