@@ -1,49 +1,27 @@
 pipeline {
-  agent {
-    docker {
-      image 'hashicorp/terraform:latest'
-      args '--entrypoint=/bin/sh'
-    }
-  }
-  environment {
-    TF_WORKING_DIR         = 'devop_project_1'
-    AWS_ACCESS_KEY_ID      = credentials('aws-access-key-id')
-    AWS_SECRET_ACCESS_KEY  = credentials('aws-secret-access-key')
-    AWS_DEFAULT_REGION     = 'us-east-1'
-  }
+  agent any
   stages {
-    stage('Checkout') {
-      steps {
-        git branch: 'main', url: 'https://your-repo.git'
+    stage('Terraform') {
+      agent {
+        docker {
+          label 'docker-agent'
+          image 'hashicorp/terraform:latest'
+          args '--entrypoint=/bin/sh'
+        }
       }
-    }
-    stage('Terraform Init') {
-      steps {
-        sh """
-          cd ${TF_WORKING_DIR}
-          terraform init
-        """
+      environment {
+        TF_WORKING_DIR = 'devop_project_1'
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        AWS_DEFAULT_REGION = 'us-east-1'
       }
-    }
-    stage('Terraform Plan') {
       steps {
-        sh """
-          cd ${TF_WORKING_DIR}
-          terraform plan -out=tfplan
-        """
-      }
-    }
-    stage('Review / Approval') {
-      steps {
-        input message: "Approve Terraform apply?", ok: "Apply"
-      }
-    }
-    stage('Terraform Apply') {
-      steps {
-        sh """
-          cd ${TF_WORKING_DIR}
-          terraform apply -auto-approve tfplan
-        """
+        dir("${TF_WORKING_DIR}") {
+          sh 'terraform init'
+          sh 'terraform plan -out=tfplan'
+          input message: 'Approve Terraform Apply?', ok: 'Apply'
+          sh 'terraform apply -auto-approve tfplan'
+        }
       }
     }
   }
