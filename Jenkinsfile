@@ -2,16 +2,14 @@ pipeline {
   agent {
     docker {
       image 'hashicorp/terraform:latest'
-      // override default entrypoint so sh steps work
       args '--entrypoint=/bin/sh'
     }
   }
   environment {
-    TF_WORKING_DIR = 'devop_project_1'  
-	  AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-        AWS_DEFAULT_REGION    = 'us-east-1'
-    }// your Terraform config directory
+    TF_WORKING_DIR         = 'devop_project_1'
+    AWS_ACCESS_KEY_ID      = credentials('aws-access-key-id')
+    AWS_SECRET_ACCESS_KEY  = credentials('aws-secret-access-key')
+    AWS_DEFAULT_REGION     = 'us-east-1'
   }
   stages {
     stage('Checkout') {
