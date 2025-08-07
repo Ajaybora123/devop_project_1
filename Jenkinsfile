@@ -2,6 +2,10 @@ pipeline {
     agent any
 
     environment {
+	    docker.image('hashicorp/terraform:1.5.7').inside('--entrypoint=""') {
+    sh 'cd terraform && terraform init'
+	    }
+
         TF_IMAGE = 'hashicorp/terraform:1.5.7'
         TF_DIR = 'main' // folder with .tf files
 	    AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
@@ -63,3 +67,4 @@ pipeline {
         booleanParam(name: 'APPLY_TF', defaultValue: false, description: 'Apply Terraform changes?')
     }
 }
+
