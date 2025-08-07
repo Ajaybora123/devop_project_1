@@ -21,7 +21,8 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    docker.image(TF_IMAGE).inside("-v ${env.WORKSPACE}:/workspace") {
+                              docker.image('hashicorp/terraform:1.5.7').inside('--entrypoint=\'\'') {
+ {
                         sh """
                             cd /workspace/${TF_DIR}
                             terraform init
@@ -34,7 +35,8 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 script {
-                    docker.image(TF_IMAGE).inside("-v ${env.WORKSPACE}:/workspace") {
+                               docker.image('hashicorp/terraform:1.5.7').inside('--entrypoint=\'\'') {
+ {
                         sh """
                             cd /workspace/${TF_DIR}
                             terraform plan
@@ -50,7 +52,8 @@ pipeline {
             }
             steps {
                 script {
-                    docker.image(TF_IMAGE).inside("-v ${env.WORKSPACE}:/workspace") {
+                           docker.image('hashicorp/terraform:1.5.7').inside('--entrypoint=\'\'') {
+ {
                         sh """
                             cd /workspace/${TF_DIR}
                             terraform apply -auto-approve
@@ -66,6 +69,7 @@ pipeline {
     }
 
 }
+
 
 
 
