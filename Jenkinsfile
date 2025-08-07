@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     environment {
-	    docker.image('hashicorp/terraform:1.5.7').inside('--entrypoint=""') {
-    sh 'cd terraform && terraform init'
-	    }
+	    docker.image('hashicorp/terraform:1.5.7').inside('--entrypoint=""') 
 
         TF_IMAGE = 'hashicorp/terraform:1.5.7'
         TF_DIR = 'main' // folder with .tf files
@@ -66,7 +64,8 @@ pipeline {
     parameters {
         booleanParam(name: 'APPLY_TF', defaultValue: false, description: 'Apply Terraform changes?')
     }
+
 }
-}
+
 
 
